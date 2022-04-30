@@ -2,43 +2,27 @@
 
 #pragma once
 
-#include <ostream>
-#include <istream>
+#include <stdio.h>
 #include <string>
+#include <iostream>
 #include <vector>
 #include <deque>
-#include <tuple>
 #include <map>
+#include <fstream>
+#define rand_r rand
 
 const int NPREF = 2;
 const int MAXGEN = 1000;
 
-typedef std::deque<std::string> Prefix;
-
 class MarkovGenerator {
  private:
-    std::map<Prefix, std::vector<std::string>> statetab;
-
+    int prefixSize;
+    typedef std::deque<std::string> prefix;
+    std::map<prefix, std::vector<std::string> > statetab;
+    std::vector<std::string> words;
  public:
-    Prefix ReadState(std::istream &in, const int npref = NPREF);
-
-    void addPrefix(const Prefix& prefix);
-    void addSuffixToPrefix(const Prefix& prefix, const std::string& suffix);
-
-    bool hasPrefix(const Prefix & prefix);
-
-    std::tuple<std::string, bool>
-    getNextSuffix(Prefix &prefix,
-                  unsigned int *state);
-
-    void write(std::ostream &out,
-               Prefix &starting_prefix,
-               unsigned *state,
-               unsigned len = MAXGEN);
-
-    std::vector<std::string>
-    operator[](Prefix &prefix);
+    MarkovGenerator(std::string path, int preflen);
+    std::string getText(int wordsamount);
+    int getPrefixSize();
+    std::string getSuffix(std::deque<std::string> prefdeq);
 };
-
-void shiftPrefix(Prefix &prefix,
-                 const std::string &new_suffix);
