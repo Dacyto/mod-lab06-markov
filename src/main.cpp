@@ -7,12 +7,6 @@
 #include "textgen.h"
 
 int main() {
-    MarkovGenerator gen;
-
-    std::ifstream file("input.txt");
-    Prefix start = gen.ReadState(file);
-
-    unsigned state = time(nullptr);
-
-    gen.write(std::cout, start, &state);
+    MarkovGenerator gen = MarkovGenerator("input.txt", NPREF);
+    std::cout << gen.getText(MAXGEN) << std::endl;
 }
