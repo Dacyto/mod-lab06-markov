@@ -44,3 +44,68 @@ void MarkovGenerator::addSuffixToPrefix(const Prefix& prefix,
     }
 }
 
+void shiftPrefix(Prefix &prefix,
+                 const std::string &new_suffix) {
+    prefix.pop_front();
+    prefix.push_back(new_suffix);
+}
+
+bool MarkovGenerator::hasPrefix(const Prefix & prefix) {
+    return (statetab.find(prefix) != statetab.end());
+}
+
+std::tuple<std::string, bool>
+MarkovGenerator::getNextSuffix(Prefix &prefix, unsigned int *state) {
+    if (state == nullptr) throw std::invalid_argument("Nullptr passed");
+
+    std::map<Prefix, std::vector<std::string>>::iterator it;
+
+    it = statetab.find(prefix);
+
+    std::string suffix;
+
+    bool found = false;
+
+    if (it != statetab.end()) {
+        suffix = it->second[rand_r(state) % (it->second).size()];
+        shiftPrefix(prefix, suffix);
+
+        found = true;
+    }
+
+    return std::make_tuple(suffix, found);
+}
+
+void MarkovGenerator::write(std::ostream &out,
+                            Prefix &starting_prefix,
+                            unsigned *state,
+                            unsigned len) {
+    if (state == nullptr) throw std::invalid_argument("Nullptr passed");
+
+    Prefix prefix = starting_prefix;
+
+    for (auto& str : prefix) {
+        out << str << " ";
+    }
+
+    for (int i = 0; i < len; i++) {
+        auto [suffix, found] = getNextSuffix(prefix, state);
+
+        if (found) {
+            out << suffix << " ";
+        } else {
+            break;
+        }
+    }
+
+    out << '\n';
+}
+
+std::vector<std::string>
+MarkovGenerator::operator[](Prefix &prefix) {
+    if (hasPrefix(prefix)) {
+        return statetab[prefix];
+    } else {
+        return std::vector<std::string>();
+    }
+}
