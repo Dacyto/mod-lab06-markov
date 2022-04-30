@@ -26,7 +26,7 @@ TEST(task4, test4) {
   MarkovGenerator gen = MarkovGenerator("input.txt", NPREF);
   std::deque<std::string> newPrefixes {"Страшным", "шумом"};
   std::string newSuffix = gen.getSuffix(newPrefixes);
-  EXPECT_TRUE(newSuffix == "пробужден" || newSuffix == "оглушает");
+  EXPECT_LE(newSuffix == "пробужден" || newSuffix == "оглушает");
 }
 
 TEST(task5, test5) {
