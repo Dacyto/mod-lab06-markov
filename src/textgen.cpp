@@ -28,3 +28,19 @@ Prefix MarkovGenerator::ReadState(std::istream &in, const int npref) {
 
     return starting_prefix;
 }
+
+void MarkovGenerator::addPrefix(const Prefix& prefix) {
+    statetab[prefix];
+}
+
+void MarkovGenerator::addSuffixToPrefix(const Prefix& prefix,
+                                        const std::string& suffix) {
+    addPrefix(prefix);
+
+    std::vector<std::string> &vec = statetab[prefix];
+
+    if (std::find(vec.begin(), vec.end(), suffix) == vec.end()) {
+        vec.push_back(suffix);
+    }
+}
+
