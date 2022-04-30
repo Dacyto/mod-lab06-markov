@@ -1,111 +1,72 @@
 // Copyright 2022 Dacyto
 
-#include <algorithm>
-#include <string>
-
 #include "textgen.h"
 
-Prefix MarkovGenerator::ReadState(std::istream &in, const int npref) {
-    std::string in_string;
-
-    Prefix prefix;
-
-    Prefix starting_prefix;
-
-    for (int i = 0; i < npref; i++) {
-        in >> in_string;
-
-        prefix.push_back(std::move(in_string));
+MarkovGenerator::MarkovGenerator(std::string path, int preflen) {
+    prefixSize = preflen;
+    std::ifstream file(path);
+    std::string s;
+    for (file >> s; !file.eof(); file >> s) {
+        words.push_back(s);
     }
 
-    starting_prefix = prefix;
+    for (int i = 0; i < words.size() - prefixSize + 1; i++) {
+        prefix aFewWords;
+        std::vector<std::string> suffixes;
 
-    while (in >> in_string) {
-        addPrefix(prefix);
-        addSuffixToPrefix(prefix, in_string);
-        shiftPrefix(prefix, in_string);
-    }
-
-    return starting_prefix;
-}
-
-void MarkovGenerator::addPrefix(const Prefix& prefix) {
-    statetab[prefix];
-}
-
-void MarkovGenerator::addSuffixToPrefix(const Prefix& prefix,
-                                        const std::string& suffix) {
-    addPrefix(prefix);
-
-    std::vector<std::string> &vec = statetab[prefix];
-
-    if (std::find(vec.begin(), vec.end(), suffix) == vec.end()) {
-        vec.push_back(suffix);
-    }
-}
-
-void shiftPrefix(Prefix &prefix,
-                 const std::string &new_suffix) {
-    prefix.pop_front();
-    prefix.push_back(new_suffix);
-}
-
-bool MarkovGenerator::hasPrefix(const Prefix & prefix) {
-    return (statetab.find(prefix) != statetab.end());
-}
-
-std::tuple<std::string, bool>
-MarkovGenerator::getNextSuffix(Prefix &prefix, unsigned int *state) {
-    if (state == nullptr) throw std::invalid_argument("Nullptr passed");
-
-    std::map<Prefix, std::vector<std::string>>::iterator it;
-
-    it = statetab.find(prefix);
-
-    std::string suffix;
-
-    bool found = false;
-
-    if (it != statetab.end()) {
-        suffix = it->second[rand_r(state) % (it->second).size()];
-        shiftPrefix(prefix, suffix);
-
-        found = true;
-    }
-
-    return std::make_tuple(suffix, found);
-}
-
-void MarkovGenerator::write(std::ostream &out,
-                            Prefix &starting_prefix,
-                            unsigned *state,
-                            unsigned len) {
-    if (state == nullptr) throw std::invalid_argument("Nullptr passed");
-
-    Prefix prefix = starting_prefix;
-
-    for (auto& str : prefix) {
-        out << str << " ";
-    }
-
-    for (int i = 0; i < len; i++) {
-        auto [suffix, found] = getNextSuffix(prefix, state);
-
-        if (found) {
-            out << suffix << " ";
-        } else {
-            break;
+        for (int j = 0; j < prefixSize; j++) {
+            aFewWords.push_back(words[i + j]);
         }
-    }
 
-    out << '\n';
+        for (int j = 0; j < words.size() - prefixSize; j++) {
+            bool toSave = true;
+            for (int k = 0; k < prefixSize; k++) {
+                if (words[i + k] != words[j + k])
+                    toSave = false;
+        }
+        if (toSave)
+            suffixes.push_back(words[j + prefixSize]);
+        }
+
+    statetab.insert(make_pair(aFewWords, suffixes));
+    }
 }
 
-std::vector<std::string>
-MarkovGenerator::operator[](Prefix &prefix) {
-    if (hasPrefix(prefix)) {
-        return statetab[prefix];
-    } else {
-        return std::vector<std::string>();
+std::string MarkovGenerator::getText(int wordsamount) {
+    prefix currentPrefixes;
+    for (int i = 0; i < prefixSize; i++) {
+        currentPrefixes.push_back(words[i]);
     }
+    srand(time(NULL));
+
+    std::string result = currentPrefixes[0] + " " + currentPrefixes[1] + " ";
+
+    for (int i = prefixSize; i < wordsamount - prefixSize; i++) {
+        std::vector <std::string> currentSuffix = statetab.at(currentPrefixes);
+
+        if (currentSuffix.size() == 0)
+            break;
+
+        int index = rand_r() % currentSuffix.size();
+        result += currentSuffix[index] + " ";
+        currentPrefixes.erase(currentPrefixes.begin());
+        currentPrefixes.push_back(currentSuffix[index]);
+    }
+
+    return result;
+}
+
+int MarkovGenerator::getPrefixSize() {
+    return prefixSize;
+}
+
+std::string MarkovGenerator::getSuffix(std::deque<std::string> prefdeq) {
+    prefix prefixes;
+    for (int i = 0; i < prefdeq.size(); i++)
+        prefixes.push_back(prefdeq[i]);
+
+    srand(time(NULL));
+    std::vector <std::string> suffix = statetab.at(prefixes);
+    int index = rand_r() % suffix.size();
+    return suffix[index];
 }
