@@ -10,9 +10,9 @@ TEST(task1, test1) {
 
 TEST(task2, test2) {
   MarkovGenerator gen = MarkovGenerator("input.txt", NPREF);
-  std::deque<std::string> newPrefixes {"никак", "не"};
+  std::deque<std::string> newPrefixes {"Страшный", "вред"};
   std::string newSuffix = gen.getSuffix(newPrefixes);
-  EXPECT_EQ("успевали", newSuffix);
+  EXPECT_EQ("ему", newSuffix);
 }
 
 TEST(task3, test3) {
@@ -24,7 +24,7 @@ TEST(task3, test3) {
 
 TEST(task4, test4) {
   MarkovGenerator gen = MarkovGenerator("input.txt", NPREF);
-  std::deque<std::string> newPrefixes {"Царь", "скопца"};
+  std::deque<std::string> newPrefixes {"царь", "скопца"};
   std::string newSuffix = gen.getSuffix(newPrefixes);
   EXPECT_TRUE(newSuffix == "благодарит" || newSuffix == "зауважал");
 }
