@@ -28,17 +28,17 @@ class MarkovGenerator {
     bool hasPrefix(const Prefix & prefix);
 
     std::tuple<std::string, bool>
-    getNextSuffix(Prefix &prefix, // NOLINT(runtime/references)
+    getNextSuffix(Prefix &prefix,
                   unsigned int *state);
 
     void write(std::ostream &out,
-               Prefix &starting_prefix, // NOLINT(runtime/references)
+               Prefix &starting_prefix,
                unsigned *state,
                unsigned len = MAXGEN);
 
     std::vector<std::string>
-    operator[](Prefix &prefix); // NOLINT(runtime/references)
+    operator[](Prefix &prefix);
 };
 
-void shiftPrefix(Prefix &prefix, // NOLINT(runtime/references)
+void shiftPrefix(Prefix &prefix,
                  const std::string &new_suffix);
